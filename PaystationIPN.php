@@ -311,7 +311,7 @@ class PaystationIPN extends CRM_Core_Payment_BaseIPN {
    */
   function main($rawPostData, $ps_url, $ps_api, $ps_user, $ps_key) {
     $config = CRM_Core_Config::singleton();
-    define('RESPONSE_HANDLER_LOG_FILE', $config->uploadDir . 'CiviCRM.Paystation.log');
+    define('RESPONSE_HANDLER_LOG_FILE', $config->configAndLogDir . 'CiviCRM.Paystation.log');
     $transactionID = isset($rawPostData['ti']) ? $rawPostData['ti'] : '';
     $errorCode = isset($rawPostData['ec']) ? $rawPostData['ec'] : '';
     $errorMessage = isset($rawPostData['em']) ? $rawPostData['em'] : '';
@@ -332,7 +332,7 @@ class PaystationIPN extends CRM_Core_Payment_BaseIPN {
     $qlParams = '?pi=' . $ps_user;
     $qlParams .= isset($rawPostData['ti']) ? '&ti=' . $rawPostData['ti'] : '';
     $url .= $qlParams;
-    fwrite($message_log, sprintf("\n\r%s:- %s\n", date("D M j G:i:s T Y"), 'Quick Lookup: ' . $url));
+    fwrite($message_log, sprintf("\n\r%s:- %s\n", date("D M j G:i:s T Y"), " LINE " . __LINE__ . ' Quick Lookup: ' . $url));
 
     $success = false;
 
@@ -341,7 +341,7 @@ class PaystationIPN extends CRM_Core_Payment_BaseIPN {
     $utils = new PaystationUtils();
     if ($response = $utils->quickLookup($url, $message_log)) {
       //CRM_Core_Error::debug_var('response', $response);
-      fwrite($message_log, sprintf("\n\r%s:- %s\n", date("D M j G:i:s T Y"), $response));
+      fwrite($message_log, sprintf("\n\r%s:- %s\n", date("D M j G:i:s T Y"), " LINE " . __LINE__ . ' ' . $response));
 
       $xml = simplexml_load_string($response);
       if (isset($xml)) {
@@ -428,6 +428,7 @@ class PaystationIPN extends CRM_Core_Payment_BaseIPN {
     }
     else {
       // calling Paystation failed
+      CRM_Core_Error::debug_var('response', $response);
       CRM_Core_Error::fatal(ts('Unable to establish connection to the payment gateway to verify transaction response.'));
       exit();
     }
