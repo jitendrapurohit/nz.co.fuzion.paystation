@@ -54,7 +54,10 @@ class CRM_Core_Payment_Paystation extends CRM_Core_Payment {
   }
 
   /**
-   * @TODO Please document this function.
+   * This function checks to see if the config is valid.
+   *
+   * @return void|string
+   *   Error message.
    */
   function checkConfig() {
     $config = CRM_Core_Config::singleton();
@@ -106,13 +109,14 @@ class CRM_Core_Payment_Paystation extends CRM_Core_Payment {
   }
 
   /**
-   * Main transaction function
+   * Main transaction function for offsite processors.
    *
-   * @param array $params  name value pair of contribution data
+   * @param array $params
+   *  Keyed array of contribution parameters.
    *
    * @return void
-   * @access public
    *
+   * @access public
    */
   function doTransferCheckout(&$params, $component) {
     $component = strtolower($component);
@@ -262,7 +266,7 @@ class CRM_Core_Payment_Paystation extends CRM_Core_Payment {
         'qfKey' => $httpRequest['qfKey']
       );
     }
-    else{
+    else {
       CRM_Core_Error::debug_log_message( "Failed to decode return IPN string" );
     }
 
@@ -275,12 +279,18 @@ class CRM_Core_Payment_Paystation extends CRM_Core_Payment {
 
   /**
    * Get URL which the browser should be returned to if they cancel or
-   * are unsuccessful
+   * are unsuccessful.
    *
-   * @params array
-   * @component string $component function is called from
-   * @return string $cancelURL Fully qualified return URL
-   * @todo Ideally this would be in the parent payment class
+   * @param array
+   *  Keyed array of contribution parameters.
+   *
+   * @param string
+   *  CiviCRM component (eg event, contribute).
+   *
+   * @return string
+   *   Fully qualified return URL
+   *
+   * @todo Ideally this would be in the parent payment class.
    */
   function getCancelUrlForComponent($params, $component){
     $component = strtolower( $component );

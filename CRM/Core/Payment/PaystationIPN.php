@@ -25,6 +25,10 @@ class CRM_Core_Payment_PaystationIPN extends CRM_Core_Payment_BaseIPN {
    * @static
    */
   protected static $_mode = null;
+
+  /**
+   * @TODO Please document this function.
+   */
   static function retrieve($name, $type, $object, $abort = true) {
     $value = CRM_Utils_Array::value($name, $object);
     if ($abort && $value === null) {
@@ -311,6 +315,7 @@ class CRM_Core_Payment_PaystationIPN extends CRM_Core_Payment_BaseIPN {
    */
   function main($rawPostData, $ps_url, $ps_api, $ps_user, $ps_key) {
     $config = CRM_Core_Config::singleton();
+    // @TODO Really shouldn't be a predictable filename.
     define('RESPONSE_HANDLER_LOG_FILE', $config->configAndLogDir . 'CiviCRM.Paystation.log');
     $transactionID = isset($rawPostData['ti']) ? $rawPostData['ti'] : '';
     $errorCode = isset($rawPostData['ec']) ? $rawPostData['ec'] : '';
@@ -323,7 +328,7 @@ class CRM_Core_Payment_PaystationIPN extends CRM_Core_Payment_BaseIPN {
 
     // Quick lookup
     // Setup the log file
-    if (! $message_log = fopen(RESPONSE_HANDLER_LOG_FILE, "a")) {
+    if (!$message_log = fopen(RESPONSE_HANDLER_LOG_FILE, "a")) {
       error_func("Cannot open " . RESPONSE_HANDLER_LOG_FILE . " file.\n", 0);
       exit(1);
     }
