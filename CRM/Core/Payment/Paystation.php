@@ -174,40 +174,35 @@ class CRM_Core_Payment_Paystation extends CRM_Core_Payment {
     $utils = new CRM_Core_Payment_PaystationUtils();
     $paystationParams = 'paystation&' . $utils->paystation_query_string_encode($psParams);
 
-    CRM_Core_Error::debug_log_message('Paystation Params: ' . $paystationParams);
     if ($initiationResult = $utils->directTransaction($paystationURL, $paystationParams)) {
       $xml = simplexml_load_string($initiationResult);
       if (isset($xml)) {
         $result = (array) $xml;
 
-        if (! empty($result['PaystationTransactionID'])) {
-          // the request was validated, so we'll get the URL and redirect to it
-          if (! empty($result['DigitalOrder'])) {
+        if (!empty($result['PaystationTransactionID'])) {
+          // Request was validated, so we'll get the URL and redirect to it.
+          if (!empty($result['DigitalOrder'])) {
             $uri = $result['DigitalOrder'];
-            CRM_Core_Error::debug_log_message('Paystation Redirect URI: ' . $uri);
             CRM_Utils_System::redirect($uri);
           }
           else {
             // redisplay confirmation page
-            CRM_Core_Error::debug_log_message('Paystation XML: DigitalOrder element was empty.');
             CRM_Utils_System::redirect($cancelURL);
           }
         }
         else {
           // redisplay confirmation page
-          CRM_Core_Error::debug_log_message('Paystation XML: PaystationTransactionID element was empty.');
           CRM_Utils_System::redirect($cancelURL);
         }
       }
       else {
         // redisplay confirmation page
-        CRM_Core_Error::debug_log_message('XML from paystation couldn\'t be loaded by simplexml.');
         CRM_Utils_System::redirect($cancelURL);
       }
     }
     else {
       // calling Paystation failed
-      CRM_Core_Error::fatal(ts('Unable to establish connection to the payment gateway.'));
+      throw new Exception('Unable to establish connection to the payment gateway.');
     }
   }
 
@@ -267,7 +262,7 @@ class CRM_Core_Payment_Paystation extends CRM_Core_Payment {
       );
     }
     else {
-      CRM_Core_Error::debug_log_message( "Failed to decode return IPN string" );
+      Civi::log()->error( "PayStation: Failed to decode return IPN string.");
     }
 
     $paystationIPN->main($rawPostData, $psUrl, $psApi, $psUser, $psKey);
