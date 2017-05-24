@@ -121,7 +121,7 @@ class CRM_Core_Payment_Paystation extends CRM_Core_Payment {
   function doTransferCheckout(&$params, $component) {
     $component = strtolower($component);
     $cancelURL = $this->getCancelUrlForComponent($params, $component);
-    $url = CRM_Utils_System::url("civicrm/payment/ipn", "processor_id={$params['payment_processor_id']}",false, null, false);
+    $url = CRM_Utils_System::url("civicrm/payment/ipn/{$params['payment_processor_id']}", '', true, null, false);
     $config = CRM_Core_Config::singleton();
 
     /**
@@ -155,13 +155,14 @@ class CRM_Core_Payment_Paystation extends CRM_Core_Payment {
 
     // "paystation&pstn_pi=".$pstn_pi."&pstn_gi=".$pstn_gi."&pstn_ms=".$merchantSession."&pstn_am=".$amount."&pstn_mr=".$pstn_mr."&pstn_nr=t";
     $psParams = array(
+      'paystation' => '_empty',
       'pstn_pi' => $this->_paymentProcessor['user_name'],  // Paystation ID
       'pstn_gi' => $this->_paymentProcessor['password'],  // Gateway ID
       'pstn_ms' => time() . '_' . $params['qfKey'],  // Merchant Session ** unique for each financial transaction request
       'pstn_am' => str_replace(",", "", number_format($params['amount'], 2)),  // Amount
       'pstn_af' => 'dollars.cents',  // Amount Format (optional): 'dollars.cents' or 'cents'
       'pstn_mr' => $merchantRef,  // Merchant Reference (optional)
-      'pstn_nr' => 't',  // Undocumented
+      'pstn_nr' => 't',  // No redirect flag.
       'data' => $privateData,  // Data to be passed back to us
       'component' => $component,
       'qfKey' => $params['qfKey']
@@ -172,9 +173,26 @@ class CRM_Core_Payment_Paystation extends CRM_Core_Payment {
     }
 
     $utils = new CRM_Core_Payment_PaystationUtils();
-    $paystationParams = 'paystation&' . $utils->paystation_query_string_encode($psParams);
 
-    CRM_Core_Error::debug_log_message('Paystation Params: ' . $paystationParams);
+    if (empty($this->_paymentProcessor['signature'])) {
+      $paystationParams = $utils->paystation_query_string_encode($psParams);
+    }
+    else {
+      $psParams += array(
+        'pstn_du' => $url,
+        'pstn_dp' => $url,
+      );
+
+      $time = time();
+
+      $paystationParams = $utils->paystation_query_string_encode($psParams);
+      $hmacBody = pack('a*', $time) . pack('a*', 'paystation') .
+        pack('a*', $paystationParams);
+      $hmacHash = hash_hmac('sha512', $hmacBody, $this->_paymentProcessor['signature']);
+      $hmacGetParams = "?pstn_HMACTimestamp={$time}&pstn_HMAC={$hmacHash}";
+      $paystationURL = $paystationURL . $hmacGetParams;
+    }
+
     if ($initiationResult = $utils->directTransaction($paystationURL, $paystationParams)) {
       $xml = simplexml_load_string($initiationResult);
       if (isset($xml)) {
