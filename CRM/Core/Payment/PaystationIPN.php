@@ -27,21 +27,17 @@ class CRM_Core_Payment_PaystationIPN extends CRM_Core_Payment_BaseIPN {
   protected static $_mode = null;
 
   /**
-   * @TODO Please document this function.
+   * Retrieve and validate a value from a thing.
    */
   static function retrieve($name, $type, $object, $abort = true) {
     $value = CRM_Utils_Array::value($name, $object);
     if ($abort && $value === null) {
-      CRM_Core_Error::debug_log_message("Could not find an entry for $name");
-      echo "Failure: Missing Parameter - " . $name . "<p>";
-      exit();
+      throw new Exception("Could not find a value for {$name}.");
     }
 
     if ($value) {
       if (! CRM_Utils_Type::validate($value, $type)) {
-        CRM_Core_Error::debug_log_message("Could not find a valid entry for $name");
-        echo "Failure: Invalid Parameter<p>";
-        exit();
+        throw new Exception("Invalid entry for {$name}.");
       }
     }
 
@@ -67,7 +63,7 @@ class CRM_Core_Payment_PaystationIPN extends CRM_Core_Payment_BaseIPN {
   }
 
   /**
-   * singleton function used to manage this object
+   * Singleton function used to manage this object.
    *
    * @param string $mode the mode of operation: live or test
    *
@@ -121,9 +117,7 @@ class CRM_Core_Payment_PaystationIPN extends CRM_Core_Payment_BaseIPN {
     $input['trxn_id'] = $merchantData['PaystationTransactionID'];
 
     if ($contribution->invoice_id != $input['invoice']) {
-      CRM_Core_Error::debug_log_message("Invoice values dont match between database and IPN request");
-      echo "Failure: Invoice values dont match between database and IPN request<p>";
-      return;
+      throw new Exception("Invoice values dont match between database and IPN request");
     }
 
     // let's replace invoice-id with Payment Processor -number because
@@ -134,9 +128,7 @@ class CRM_Core_Payment_PaystationIPN extends CRM_Core_Payment_BaseIPN {
     $input['amount'] = $merchantData['PurchaseAmount'];
 
     if ($contribution->total_amount != $input['amount']) {
-      CRM_Core_Error::debug_log_message("Amount values dont match between database and IPN request");
-      echo "Failure: Amount values dont match between database and IPN request. " . $contribution->total_amount . "/" . $input['amount'] . "<p>";
-      return;
+      throw new Exception("Amount values dont match between database and IPN request");
     }
 
     require_once 'CRM/Core/Transaction.php';
@@ -198,8 +190,7 @@ class CRM_Core_Payment_PaystationIPN extends CRM_Core_Payment_BaseIPN {
     // this ipn
     if ($contribution->contribution_status_id == 1) {
       $transaction->commit();
-      CRM_Core_Error::debug_log_message("returning since contribution has already been handled");
-      echo "Success: Contribution has already been handled<p>";
+      Civi::log()->info('Contribution has already been handled.');
       return true;
     }
     else {
