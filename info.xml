@@ -5,17 +5,17 @@
   <description>Paystation Payment Processor</description>
   <license>AGPL-3.0</license>
   <maintainer>
-    <author>Eileen McNaughton</author>
-    <email>eileen@fuzion.co.nz</email>
+    <author>Fuzion Team</author>
+    <email>team@fuzion.co.nz</email>
   </maintainer>
   <urls>
-    <url desc="Main Extension Page"></url>
-    <url desc="Documentation"></url>
-    <url desc="Support"></url>
+    <url desc="Main Extension Page">https://github.com/fuzionnz/nz.co.fuzion.paystation</url>
+    <url desc="Documentation">https://github.com/fuzionnz/nz.co.fuzion.paystation</url>
+    <url desc="Support">https://github.com/fuzionnz/nz.co.fuzion.paystation/issues</url>
     <url desc="Licensing">http://www.gnu.org/licenses/agpl-3.0.html</url>
   </urls>
-  <releaseDate>2017-03-22</releaseDate>
-  <version>3.0</version>
+  <releaseDate>2017-05-27</releaseDate>
+  <version>3.1</version>
   <develStage>alpha</develStage>
   <compatibility>
     <ver>4.7</ver>
