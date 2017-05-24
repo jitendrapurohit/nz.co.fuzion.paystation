@@ -274,7 +274,10 @@ class CRM_Core_Payment_Paystation extends CRM_Core_Payment {
 
     // PaystationIPN::main() exits, but if for any reason we come back
     // here, we'll file a written complaint to our seniors.
-    CRM_Core_Error::debug_log_message( "It should not be possible to reach this line" );
+    //
+    // This is a really unhelpful error message!
+    // See https://github.com/fuzionnz/nz.co.fuzion.paystation/issues/10
+    Civi::log()->error( "It should not be possible to reach this line" );
   }
 
   /**
